@@ -1,0 +1,17 @@
+{
+  "name": "gestor-de-gastos",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "api"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace api",
+    "dev": "npm run dev --workspace api",
+    "db:init": "npm run db:init --workspace api",
+    "db:migrate": "npm run db:migrate --workspace api",
+    "db:rollback": "npm run db:rollback --workspace api",
+    "db:seed": "npm run db:seed --workspace api",
+    "db:setup": "npm run db:setup --workspace api"
+  }
+}

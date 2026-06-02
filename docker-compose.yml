@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gestor-de-gastos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gestor_gastos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - gestor_de_gastos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestor_gastos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  gestor_de_gastos_pgdata:
