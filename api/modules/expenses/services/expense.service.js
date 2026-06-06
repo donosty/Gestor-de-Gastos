@@ -1,5 +1,6 @@
 import { HttpError } from '../../../core/exceptions/http-error.js';
 import {
+  countDetallesByGastoId,
   createExpense as createExpenseRecord,
   findAreaById,
   findCentroCostoById,
@@ -7,6 +8,7 @@ import {
   findExpenseById,
   findUserAreaId,
   listExpenses,
+  sendExpenseForApproval as sendExpenseForApprovalRecord,
   softDeleteExpense,
   updateExpense as updateExpenseRecord,
 } from '../repositories/expense.repository.js';
@@ -197,4 +199,28 @@ async function deleteExpense(id, user) {
   await softDeleteExpense(id);
 }
 
-export { createExpense, getExpenses, getExpenseById, updateExpense, deleteExpense };
+async function sendForApproval(id, user) {
+  const expense = await findExpenseById(id);
+  if (!expense || expense.deleted_at) throw new HttpError(404, 'Gasto no encontrado');
+
+  if (expense.estatus !== 'BORRADOR') {
+    throw new HttpError(409, 'Solo se pueden enviar a aprobación gastos en borrador');
+  }
+
+  if (user.rol === 'CAPTURISTA' && Number(expense.usuario_id) !== Number(user.id)) {
+    throw new HttpError(403, 'No autorizado');
+  }
+  if (!['ADMIN', 'CAPTURISTA'].includes(user.rol)) {
+    throw new HttpError(403, 'No autorizado');
+  }
+
+  const count = await countDetallesByGastoId(id);
+  if (count === 0) {
+    throw new HttpError(422, 'El gasto debe tener al menos una partida antes de enviarse a aprobación');
+  }
+
+  const estatus = await findEstatusByNombre('PENDIENTE_APROBACION');
+  return sendExpenseForApprovalRecord(id, Number(estatus.id));
+}
+
+export { createExpense, getExpenses, getExpenseById, updateExpense, deleteExpense, sendForApproval };

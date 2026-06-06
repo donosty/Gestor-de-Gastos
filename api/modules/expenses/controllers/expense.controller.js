@@ -4,6 +4,7 @@ import {
   deleteExpense,
   getExpenseById,
   getExpenses,
+  sendForApproval,
   updateExpense,
 } from '../services/expense.service.js';
 
@@ -61,10 +62,21 @@ async function deleteExpenseController(req, res, next) {
   }
 }
 
+async function sendForApprovalController(req, res, next) {
+  try {
+    const id = parseExpenseId(req.params.id);
+    const expense = await sendForApproval(id, req.user);
+    res.status(200).json({ data: expense });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export {
   createExpenseController,
   listExpensesController,
   getExpenseController,
   updateExpenseController,
   deleteExpenseController,
+  sendForApprovalController,
 };

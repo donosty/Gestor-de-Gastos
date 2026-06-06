@@ -160,6 +160,30 @@ async function findUserAreaId(userId) {
   return result.rows[0] || null;
 }
 
+async function countDetallesByGastoId(gastoId) {
+  const pool = getPool();
+  const result = await pool.query(
+    `SELECT COUNT(*) AS total FROM gastos_detalle WHERE gasto_id = $1`,
+    [gastoId]
+  );
+  return Number(result.rows[0].total);
+}
+
+async function sendExpenseForApproval(id, pendienteEstatusId) {
+  const pool = getPool();
+  const result = await pool.query(
+    `UPDATE gastos
+        SET estatus_id = $1,
+            fecha_envio_aprobacion = NOW(),
+            updated_at = NOW()
+      WHERE id = $2
+  RETURNING id`,
+    [pendienteEstatusId, id]
+  );
+  if (!result.rows[0]) return null;
+  return findExpenseById(id);
+}
+
 export {
   findExpenseById,
   listExpenses,
@@ -170,4 +194,6 @@ export {
   findAreaById,
   findCentroCostoById,
   findUserAreaId,
+  countDetallesByGastoId,
+  sendExpenseForApproval,
 };

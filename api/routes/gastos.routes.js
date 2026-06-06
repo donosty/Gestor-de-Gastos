@@ -24,6 +24,7 @@ import {
   deleteExpenseController,
   getExpenseController,
   listExpensesController,
+  sendForApprovalController,
   updateExpenseController,
 } from '../modules/expenses/controllers/expense.controller.js';
 
@@ -43,6 +44,7 @@ function createGastosRouter() {
   router.post('/', requireRole(['CAPTURISTA', 'ADMIN']), createExpenseController);
   router.put('/:id', requireRole(['CAPTURISTA', 'ADMIN']), updateExpenseController);
   router.delete('/:id', requireRole(['CAPTURISTA', 'ADMIN']), deleteExpenseController);
+  router.post('/:id/enviar', requireRole(['CAPTURISTA', 'ADMIN']), sendForApprovalController);
 
   // cfdi (rutas anidadas)
   router.post('/:id/cfdi', requireRole(['CAPTURISTA', 'ADMIN']), express.text({ type: ['text/xml', 'application/xml'] }), uploadCfdiController);
