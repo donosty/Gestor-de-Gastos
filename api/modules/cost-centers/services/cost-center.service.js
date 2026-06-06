@@ -2,6 +2,7 @@ import { HttpError } from '../../../core/exceptions/http-error.js';
 import {
   createCostCenter as createCostCenterRecord,
   findAreaById,
+  findCostCenterByClave,
   findCostCenterById,
   listCostCenters,
   setCostCenterActive,
@@ -53,6 +54,16 @@ function validateCostCenterPayload(payload, { requireAll }) {
   };
 }
 
+async function ensureClaveDisponible(clave, currentId = null) {
+  const existing = await findCostCenterByClave(clave);
+
+  const existingId = existing ? Number(existing.id) : null;
+
+  if (existing && existingId !== currentId) {
+    throw new HttpError(409, 'La clave ya existe');
+  }
+}
+
 async function ensureAreaExists(areaId) {
   const area = await findAreaById(areaId);
 
@@ -74,6 +85,7 @@ async function ensureCostCenterExists(id) {
 async function createCostCenter(payload) {
   const data = validateCostCenterPayload(payload, { requireAll: true });
   await ensureAreaExists(data.areaId);
+  await ensureClaveDisponible(data.clave);
   return createCostCenterRecord(data);
 }
 
@@ -89,6 +101,7 @@ async function updateCostCenter(id, payload) {
   const data = validateCostCenterPayload(payload, { requireAll: true });
   await ensureCostCenterExists(id);
   await ensureAreaExists(data.areaId);
+  await ensureClaveDisponible(data.clave, id);
 
   const updated = await updateCostCenterRecord(id, data);
 

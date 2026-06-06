@@ -66,6 +66,18 @@ async function setCostCenterActive(id, active) {
   return result.rows[0] || null;
 }
 
+async function findCostCenterByClave(clave) {
+  const pool = getPool();
+  const result = await pool.query(
+    `SELECT id, area_id, clave, nombre, descripcion, activo, created_at, updated_at
+     FROM centros_costo
+     WHERE clave = $1`,
+    [clave]
+  );
+
+  return result.rows[0] || null;
+}
+
 async function findAreaById(id) {
   const pool = getPool();
   const result = await pool.query(
@@ -82,6 +94,7 @@ export {
   createCostCenter,
   listCostCenters,
   findCostCenterById,
+  findCostCenterByClave,
   updateCostCenter,
   setCostCenterActive,
   findAreaById,
